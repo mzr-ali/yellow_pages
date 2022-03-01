@@ -41,7 +41,7 @@ def input_list(keyword, location):
 
 
 class YlpSpider(scrapy.Spider):
-    name = "german"
+    name = "ylp-g"
     allowed_domains = ["gelbeseiten.de"]
     alphabets = string.ascii_lowercase
     position = 0
@@ -153,17 +153,19 @@ class YlpSpider(scrapy.Spider):
 
                 }
             else:
+                addresss = articles.xpath('.//*[@class="mod-AdresseKompakt"]')
+                street_number = addresss.xpath('.//p[@data-wipe-name="Adresse"]/text()').get()
+                postal_code = addresss.xpath('.//p/span[@class="nobr"]/text()').get()
+                dis_km = addresss.xpath(
+                    './/p/span[@class="mod-AdresseKompakt__entfernung"]/text()').get()
                 business_name = articles.xpath('.//h2/text()').get()
-                street_number = articles.xpath('.//address/p[@class="Adresse"]/text()').get()
-                postal_code = articles.xpath('.//address/p[@class="Adresse"]/span[@class="nobr"]/text()').get()
-                dis_km = articles.xpath(
-                    './/address/p[@class="Adresse"]/span[@class="mod-AdresseKompakt__entfernung"]/text()').get()
-                address = f'{street_number if street_number else ""}{postal_code if postal_code else ""}{dis_km if dis_km else ""}'
-                phone = articles.xpath('.//address/p[@class="mod-AdresseKompakt__phoneNumber"]/text()').get()
+
+                address = f'{street_number if street_number else ""}{postal_code if postal_code else ""} { dis_km if dis_km else ""}'
+                phone = addresss.xpath('.//p[@class="mod-AdresseKompakt__phoneNumber"]/text()').get()
                 website = articles.xpath(
-                    '//div[contains(@class, "mod-Treffer__buttonleiste")]/div[@class="mod-GsSlider__slider"]/a[contains(@class,"contains-icon-homepage")]/@href').get()
+                    './/a[contains(@class,"contains-icon-homepage")]/@href').get()
                 email = articles.xpath(
-                    '//div[contains(@class, "mod-Treffer__buttonleiste")]/div[@class="mod-GsSlider__slider"]/a[contains(@class,"contains-icon-email")]/@href').get()
+                    './/a[contains(@class,"contains-icon-email")]/@href').get()
                 if email and email.startswith('mailto'):
                     email = email.split('?')[0].replace('mailto:', '')
                 else:
